@@ -38,7 +38,6 @@ class _EditStoryTabState extends State<EditStoryTab> {
       debugPrint(e.toString());
       args = {};
     }
-    debugPrint("Resat");
 
     try {
       _title = TextEditingController(text: args["title"]);
@@ -64,7 +63,10 @@ class _EditStoryTabState extends State<EditStoryTab> {
         title: "Edit Element",
       ),
       body: SafeArea(
-        child: args["catID"] == null || args["catID"] == ""
+        child: args["catID"] == null ||
+                args["catID"] == "" ||
+                args["varID"] == null ||
+                args["varID"] == ""
             ? Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -220,7 +222,8 @@ class _EditStoryTabState extends State<EditStoryTab> {
                     audioFileLink: _audioFileController.text,
                     title: _title.text,
                     description: _description.text,
-                    catID: args["catID"] ?? ""),
+                    catID: args["catID"] ?? "",
+                    varID: args["varID"] ?? ""),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
                     return Center(child: CircularProgressIndicator());

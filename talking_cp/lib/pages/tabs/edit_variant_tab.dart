@@ -6,47 +6,36 @@ import 'package:image_picker/image_picker.dart';
 import 'package:talking_cp/controllers/firebase_api.dart';
 import 'package:talking_cp/pages/components/appbar.dart';
 
-class EditCategoryTab extends StatefulWidget {
-  static String routeName = "/EditCategoryTab";
+class EditVariantTab extends StatefulWidget {
+  static String routeName = "/EditVariantTab";
 
-  const EditCategoryTab({Key? key}) : super(key: key);
+  const EditVariantTab({Key? key}) : super(key: key);
 
   @override
-  State<EditCategoryTab> createState() => _EditCategoryTabState();
+  State<EditVariantTab> createState() => _EditVariantTabState();
 }
 
-class _EditCategoryTabState extends State<EditCategoryTab> {
+class _EditVariantTabState extends State<EditVariantTab> {
   String _imageLink = "";
   final TextEditingController _title = TextEditingController();
   final TextEditingController _description = TextEditingController();
 
   String? _error;
-   String? catID;
-   String? varID;
+  late String varID;
   bool loaded = false;
 
   @override
   Widget build(BuildContext context) {
-    if(varID == null){try {
-      varID = (ModalRoute.of(context)!.settings.arguments as Map<String, String>)["varID"]; 
-    } catch (e) {
-      debugPrint(e.toString());
-      varID=null;
-    }}
-    try {
-      catID = (ModalRoute.of(context)!.settings.arguments as Map<String, String>)["catID"]; 
-    } catch (e) {
-      debugPrint(e.toString());
-      catID=null;
-    }
+    String? cVarID = ModalRoute.of(context)!.settings.arguments as String? ;
+    varID = cVarID ?? DateTime.now().millisecondsSinceEpoch.toString();
     return Scaffold(
       appBar: MyAppBar(
         //appBar: AppBar(),
-        title: "Edit Category",
+        title: "Edit Variant",
       ),
       body: SafeArea(
-        child: varID==null && catID == null ? Center(child: Text("Error: No Variant nor Category's Selected!"),) : FutureBuilder(
-          future: getCategory(catID),
+        child: FutureBuilder(
+          future: getVariant(cVarID),
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return Center(
@@ -67,8 +56,6 @@ class _EditCategoryTabState extends State<EditCategoryTab> {
                           constraints:
                               BoxConstraints(maxWidth: 400, maxHeight: 260),
                           child: Card(
-                            // shape: RoundedRectangleBorder(
-                            //     borderRadius: BorderRadius.circular(8)),
                             clipBehavior: Clip.hardEdge,
                             child: Image(
                                 image: NetworkImage(_imageLink),
@@ -153,7 +140,7 @@ class _EditCategoryTabState extends State<EditCategoryTab> {
                           setState(() {
                             _error = null;
                           });
-                          editCat();
+                          editVar();
                         },
                         child: Text("Save")),
                   ],
@@ -166,7 +153,7 @@ class _EditCategoryTabState extends State<EditCategoryTab> {
     );
   }
 
-  editCat() async {
+  editVar() async {
     //id: widget.catID, image: _imageLink, title: _title.text, desription: _description.text
     if (_title.text.isEmpty) {
       setState(() {
@@ -182,9 +169,8 @@ class _EditCategoryTabState extends State<EditCategoryTab> {
               elevation: 0,
               contentPadding: EdgeInsets.zero,
               content: FutureBuilder(
-                future: FirebaseAPI.editCat(
-                    id: catID ?? DateTime.now().millisecondsSinceEpoch.toString(),
-                    varID: varID,
+                future: FirebaseAPI.editVar(
+                    id: varID,
                     image: _imageLink,
                     title: _title.text,
                     description: _description.text),
@@ -265,16 +251,15 @@ class _EditCategoryTabState extends State<EditCategoryTab> {
     }
   }
 
-  Future<void> getCategory(String? pCatID) async {
+  Future<void> getVariant(String? pVarID) async {
     //debugPrint(pCatID);
-    if (pCatID == null || loaded == true) {
+    if (pVarID == null || loaded == true) {
       return;
     } else {
-      var x = await FirebaseAPI.getCat(id: pCatID);
+      var x = await FirebaseAPI.getVar(id: pVarID);
       if (loaded == false) {
         setState(() {
           loaded = true;
-          varID = x?["varID"];
           _title.text = x?["title"] ?? "";
           _description.text = x?["description"] ?? "";
           _imageLink = x?["image"] ?? "";

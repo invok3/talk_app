@@ -28,14 +28,14 @@ abstract class FirebaseAPI {
     }
   }
 
-  static Future<String?> editCat(
+  static Future<String?> editVar(
       {required String id,
       String? image,
       String? title,
       String? description}) async {
     try {
       await FirebaseFirestore.instance
-          .collection("categories")
+          .collection("variants")
           .doc(id)
           .set({"image": image, "title": title, "description": description});
       return null;
@@ -45,8 +45,29 @@ abstract class FirebaseAPI {
     }
   }
 
+  static Future<String?> editCat(
+      {required String id,
+      String? varID,
+      String? image,
+      String? title,
+      String? description}) async {
+    try {
+      await FirebaseFirestore.instance.collection("categories").doc(id).set({
+        "varID": varID,
+        "image": image,
+        "title": title,
+        "description": description
+      });
+      return null;
+    } catch (e) {
+      debugPrint(e.toString());
+      return e.toString();
+    }
+  }
+
   static editElement(
       {required String id,
+      required String varID,
       required String catID,
       required String imageLink,
       required String audioFileLink,
@@ -54,6 +75,7 @@ abstract class FirebaseAPI {
       String? description}) async {
     try {
       await FirebaseFirestore.instance.collection("stories").doc(id).set({
+        "varID": varID,
         "catID": catID,
         "imageLink": imageLink,
         "audioFileLink": audioFileLink,
@@ -66,12 +88,30 @@ abstract class FirebaseAPI {
     }
   }
 
+  static Future<List<Map<String, String>>> fetchVars() async {
+    try {
+      var x = await FirebaseFirestore.instance.collection("variants").get();
+      return x.docs
+          .map((e) => {
+                "id": e.id,
+                "title": e["title"].toString(),
+                "image": e["image"].toString(),
+                "description": e["description"].toString()
+              })
+          .toList();
+    } catch (e) {
+      debugPrint(e.toString());
+      return [];
+    }
+  }
+
   static Future<List<Map<String, String>>> fetchCats() async {
     try {
       var x = await FirebaseFirestore.instance.collection("categories").get();
       return x.docs
           .map((e) => {
                 "id": e.id,
+                "varID": e["varID"].toString(),
                 "title": e["title"].toString(),
                 "image": e["image"].toString(),
                 "description": e["description"].toString()
@@ -91,6 +131,7 @@ abstract class FirebaseAPI {
           .map((e) => {
                 "id": e.id,
                 "title": e["title"].toString(),
+                "varID": e["varID"].toString(),
                 "catID": e["catID"].toString(),
                 "imageLink": e["imageLink"].toString(),
                 "audioFileLink": e["audioFileLink"].toString(),
@@ -103,6 +144,21 @@ abstract class FirebaseAPI {
     }
   }
 
+  static getVar({required String id}) async {
+    try {
+      var variant =
+          await FirebaseFirestore.instance.collection("variants").doc(id).get();
+      return {
+        "title": variant["title"],
+        "image": variant["image"],
+        "description": variant["description"],
+      };
+    } catch (e) {
+      debugPrint(e.toString());
+      return null;
+    }
+  }
+
   static getCat({required String id}) async {
     try {
       var cat = await FirebaseFirestore.instance
@@ -110,6 +166,7 @@ abstract class FirebaseAPI {
           .doc(id)
           .get();
       return {
+        "varID": cat["varID"],
         "title": cat["title"],
         "image": cat["image"],
         "description": cat["description"],

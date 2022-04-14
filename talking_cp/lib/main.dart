@@ -6,11 +6,13 @@ import 'package:talking_cp/pages/tabs/about_tab.dart';
 import 'package:talking_cp/pages/tabs/categories_tab.dart';
 import 'package:talking_cp/pages/tabs/edit_category_tab.dart';
 import 'package:talking_cp/pages/tabs/edit_story_tab.dart';
+import 'package:talking_cp/pages/tabs/edit_variant_tab.dart';
 import 'package:talking_cp/pages/tabs/messages_tab.dart';
 import 'package:talking_cp/pages/tabs/notification_tab.dart';
 import 'package:talking_cp/pages/tabs/preview_page.dart';
 import 'package:talking_cp/pages/tabs/profile_tab.dart';
 import 'package:talking_cp/pages/tabs/stories_tab.dart';
+import 'package:talking_cp/pages/tabs/variants_tab.dart';
 import 'package:talking_cp/providers/reading_provider.dart';
 import 'package:talking_cp/providers/user_provider.dart';
 import 'package:talking_cp/state_manager.dart';
@@ -53,11 +55,13 @@ class MyApp extends StatelessWidget {
       //showPerformanceOverlay: true,
       routes: {
         "/": (context) => StateManager(),
+        VariantsTab.routeName: (context) => VariantsTab(),
         CategoriesTab.routeName: (context) => CategoriesTab(),
+        StoriesTab.routeName: (context) => StoriesTab(),
+        EditVariantTab.routeName: (context) => EditVariantTab(),
         EditCategoryTab.routeName: (context) => EditCategoryTab(),
         EditStoryTab.routeName: (context) => EditStoryTab(),
         ProfileTab.routeName: (context) => ProfileTab(),
-        StoriesTab.routeName: (context) => StoriesTab(),
         PreviewPage.routeName: (context) => PreviewPage(),
         AboutTab.routeName: (context) => AboutTab(),
         MessagesTab.routeName: (context) => MessagesTab(),

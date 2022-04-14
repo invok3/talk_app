@@ -9,6 +9,7 @@ import 'package:talking_cp/pages/tabs/messages_tab.dart';
 import 'package:talking_cp/pages/tabs/notification_tab.dart';
 import 'package:talking_cp/pages/tabs/profile_tab.dart';
 import 'package:talking_cp/pages/tabs/stories_tab.dart';
+import 'package:talking_cp/pages/tabs/variants_tab.dart';
 import 'package:talking_cp/providers/reading_provider.dart';
 
 class MyDrawerListView extends StatefulWidget {
@@ -60,6 +61,17 @@ class _MyDrawerListViewState extends State<MyDrawerListView> {
         ),
         ListTile(
           onTap: () => {
+            Provider.of<Reading>(context, listen: false).setVariantID(null),
+            Navigator.pushReplacementNamed(context, VariantsTab.routeName)
+          },
+          textColor: drawer ? null : Colors.white,
+          iconColor: drawer ? null : Colors.white,
+          leading: Icon(Icons.install_desktop),
+          title: Text("Variants"),
+        ),
+        ListTile(
+          onTap: () => {
+            Provider.of<Reading>(context, listen: false).setVariantID(null),
             Provider.of<Reading>(context, listen: false).setCatID(null),
             Navigator.pushReplacementNamed(context, CategoriesTab.routeName)
           },
@@ -70,7 +82,9 @@ class _MyDrawerListViewState extends State<MyDrawerListView> {
         ),
         ListTile(
           onTap: () => {
+            Provider.of<Reading>(context, listen: false).setVariantID(null),
             Provider.of<Reading>(context, listen: false).setCatID(null),
+            Provider.of<Reading>(context, listen: false).setStoryID(null),
             Navigator.pushReplacementNamed(context, StoriesTab.routeName)
           },
           textColor: drawer ? null : Colors.white,

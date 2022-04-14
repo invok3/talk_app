@@ -62,12 +62,23 @@ class _StoriesTabState extends State<StoriesTab> {
                           color: Colors.white,
                         ),
                         onPressed: () async {
-                          String? catID = await selectCatID();
+                          String? varID = await selectVarID();
+                          if (varID == null) {
+                            return;
+                          }
+                          String? catID = await selectCatID(varID: varID);
                           if (catID == null) {
                             return;
                           }
                           Navigator.pushNamed(context, EditStoryTab.routeName,
-                              arguments: {"catID": catID}).then((value) {
+                                  arguments: {"varID": varID, "catID": catID})
+                              .then((value) {
+                            Provider.of<Reading>(context, listen: false)
+                                .setVariantID(null);
+                            Provider.of<Reading>(context, listen: false)
+                                .setCatID(null);
+                            Provider.of<Reading>(context, listen: false)
+                                .setStoryID(null);
                             setState(() {});
                           });
                         },
@@ -140,6 +151,7 @@ class _StoriesTabState extends State<StoriesTab> {
                                           .toString()
                                           .contains(_searchValue))
                                       .map((e) => mCard(
+                                            varID: e["varID"] ?? "",
                                             catID: e["catID"] ?? "",
                                             id: e["id"] ?? "",
                                             title: e["title"] ?? "",
@@ -164,6 +176,7 @@ class _StoriesTabState extends State<StoriesTab> {
 
   Widget mCard(
       {required String id,
+      required String varID,
       required String catID,
       required String title,
       String? subtitle,
@@ -229,6 +242,7 @@ class _StoriesTabState extends State<StoriesTab> {
                   Navigator.of(context)
                       .pushNamed(EditStoryTab.routeName, arguments: {
                     "id": id,
+                    "varID": varID,
                     "catID": catID,
                     "title": title,
                     "subtitle": subtitle,
@@ -283,7 +297,7 @@ class _StoriesTabState extends State<StoriesTab> {
     );
   }
 
-  Future<String?> selectCatID() async {
+  Future<String?> selectCatID({required String varID}) async {
     return await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -309,12 +323,68 @@ class _StoriesTabState extends State<StoriesTab> {
             } else {
               List<Map<String, String>> mList =
                   snapshot.data as List<Map<String, String>>;
+              mList.removeWhere((element) => element["varID"] != varID);
               return mList.isEmpty
                   ? Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Center(
                           child: Text("No Categories Added"),
+                        ),
+                      ],
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: mList
+                            .map((e) => ListTile(
+                                  title: Text(e["title"].toString()),
+                                  onTap: () {
+                                    Navigator.pop(context, e["id"]);
+                                  },
+                                ))
+                            .toList(),
+                      ),
+                    );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<String?> selectVarID() async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: FutureBuilder(
+          future: FirebaseAPI.fetchVars(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(child: CircularProgressIndicator()),
+                ],
+              );
+            } else if (snapshot.data == null) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: Text("No Variants Found!"),
+                  ),
+                ],
+              );
+            } else {
+              List<Map<String, String>> mList =
+                  snapshot.data as List<Map<String, String>>;
+              return mList.isEmpty
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Center(
+                          child: Text("No Variants Added"),
                         ),
                       ],
                     )

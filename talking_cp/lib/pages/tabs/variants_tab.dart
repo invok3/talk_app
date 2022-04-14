@@ -6,20 +6,20 @@ import 'package:talking_cp/pages/components/appbar.dart';
 import 'package:talking_cp/pages/components/drawer_listview.dart';
 import 'package:talking_cp/pages/components/flex_sidebar.dart';
 import 'package:talking_cp/pages/components/func.dart';
-import 'package:talking_cp/pages/tabs/edit_category_tab.dart';
-import 'package:talking_cp/pages/tabs/stories_tab.dart';
+import 'package:talking_cp/pages/tabs/categories_tab.dart';
+import 'package:talking_cp/pages/tabs/edit_variant_tab.dart';
 import 'package:talking_cp/providers/reading_provider.dart';
 
-class CategoriesTab extends StatefulWidget {
-  static String routeName = "/CategoriesTab";
+class VariantsTab extends StatefulWidget {
+  static String routeName = "/VariantsTab";
 
-  const CategoriesTab({Key? key}) : super(key: key);
+  const VariantsTab({Key? key}) : super(key: key);
 
   @override
-  State<CategoriesTab> createState() => _CategoriesTabState();
+  State<VariantsTab> createState() => _VariantsTabState();
 }
 
-class _CategoriesTabState extends State<CategoriesTab> {
+class _VariantsTabState extends State<VariantsTab> {
   late bool isProtrait;
 
   String _searchValue = "";
@@ -39,7 +39,7 @@ class _CategoriesTabState extends State<CategoriesTab> {
           : null,
       appBar: MyAppBar(
         //appBar: AppBar(),
-        title: "Categories",
+        title: "Variants",
       ),
       body: SafeArea(
         child: FlexSideBar(
@@ -61,14 +61,9 @@ class _CategoriesTabState extends State<CategoriesTab> {
                           Icons.add,
                           color: Colors.white,
                         ),
-                        onPressed: () async {
-                          String? varID = await selectVarID();
-                          if (varID == null) {
-                            return;
-                          }
-                          Navigator.pushNamed(
-                              context, EditCategoryTab.routeName,
-                              arguments: {"varID": varID}).then((value) {
+                        onPressed: () {
+                          Navigator.pushNamed(context, EditVariantTab.routeName)
+                              .then((value) {
                             setState(() {});
                           });
                         },
@@ -100,7 +95,7 @@ class _CategoriesTabState extends State<CategoriesTab> {
               ),
               Expanded(
                 child: FutureBuilder(
-                  future: FirebaseAPI.fetchCats(),
+                  future: FirebaseAPI.fetchVars(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState != ConnectionState.done) {
                       return Center(
@@ -123,14 +118,9 @@ class _CategoriesTabState extends State<CategoriesTab> {
                       ));
                     } else {
                       var mList = snapshot.data as List<Map<String, String>>;
-                      if (Provider.of<Reading>(context).variantID != null) {
-                        mList.removeWhere((element) =>
-                            element["varID"] !=
-                            Provider.of<Reading>(context).variantID);
-                      }
                       return mList.isEmpty
                           ? Center(
-                              child: Text("No Categories Added"),
+                              child: Text("No Variants Added"),
                             )
                           : SingleChildScrollView(
                               controller: ScrollController(),
@@ -174,8 +164,8 @@ class _CategoriesTabState extends State<CategoriesTab> {
       margin: EdgeInsets.all(8),
       child: InkWell(
         onTap: () => {
-          Provider.of<Reading>(context, listen: false).setCatID(id),
-          Navigator.of(context).pushReplacementNamed(StoriesTab.routeName)
+          Provider.of<Reading>(context, listen: false).setVariantID(id),
+          Navigator.of(context).pushReplacementNamed(CategoriesTab.routeName)
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -225,8 +215,9 @@ class _CategoriesTabState extends State<CategoriesTab> {
                 InkWell(
                     borderRadius: BorderRadius.circular(100),
                     onTap: () {
-                      Navigator.of(context).pushNamed(EditCategoryTab.routeName,
-                          arguments: {"catID": id}).then((value) {
+                      Navigator.of(context)
+                          .pushNamed(EditVariantTab.routeName, arguments: id)
+                          .then((value) {
                         setState(() {});
                       });
                     },
@@ -243,7 +234,7 @@ class _CategoriesTabState extends State<CategoriesTab> {
                           context: context,
                           builder: (context) => AlertDialog(
                                 content: Text(
-                                    "Permanently Delete Category, This can't be Undone!"),
+                                    "Permanently Delete Variant, This can't be Undone!"),
                                 actions: [
                                   TextButton(
                                       onPressed: () =>
@@ -258,7 +249,7 @@ class _CategoriesTabState extends State<CategoriesTab> {
                         return;
                       }
                       await FirebaseFirestore.instance
-                          .collection("categories")
+                          .collection("variants")
                           .doc(id)
                           .delete();
                       setState(() {});
@@ -272,61 +263,6 @@ class _CategoriesTabState extends State<CategoriesTab> {
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Future<String?> selectVarID() async {
-    return await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: FutureBuilder(
-          future: FirebaseAPI.fetchVars(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(child: CircularProgressIndicator()),
-                ],
-              );
-            } else if (snapshot.data == null) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: Text("No Variants Found!"),
-                  ),
-                ],
-              );
-            } else {
-              List<Map<String, String>> mList =
-                  snapshot.data as List<Map<String, String>>;
-              return mList.isEmpty
-                  ? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Center(
-                          child: Text("No Variants Added"),
-                        ),
-                      ],
-                    )
-                  : SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: mList
-                            .map((e) => ListTile(
-                                  title: Text(e["title"].toString()),
-                                  onTap: () {
-                                    Navigator.pop(context, e["id"]);
-                                  },
-                                ))
-                            .toList(),
-                      ),
-                    );
-            }
-          },
         ),
       ),
     );

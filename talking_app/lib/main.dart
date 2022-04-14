@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 
 void main() {
   runApp(const MyApp());
@@ -50,15 +53,22 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  AudioPlayer player = AudioPlayer();
+
+  int track = 0;
+
+  List<String> sounds = [];
+
+  void _incrementCounter() async {
+    sounds = [
+      "https://firebasestorage.googleapis.com/v0/b/talking-app-58e1d.appspot.com/o/audio%2F1649466765287.mp3?alt=media&token=668fc02f-754c-489c-bb76-f97990045c81",
+      "https://firebasestorage.googleapis.com/v0/b/talking-app-58e1d.appspot.com/o/audio%2F1649466808572.mp3?alt=media&token=d6ca299b-e894-4c29-b34e-aed358d3ade8",
+      "https://firebasestorage.googleapis.com/v0/b/talking-app-58e1d.appspot.com/o/audio%2F1649466532330.mp3?alt=media&token=a6113e6f-16a6-4cc1-bf14-c2e1f105a4ee",
+    ];
+    await player.setAudioSource(ConcatenatingAudioSource(
+        children:
+            sounds.map((e) => ProgressiveAudioSource(Uri.parse(e))).toList()));
+    player.play();
   }
 
   @override

@@ -7,6 +7,7 @@ import 'package:talking_cp/pages/components/flex_sidebar.dart';
 import 'package:talking_cp/pages/components/func.dart';
 import 'package:talking_cp/pages/tabs/categories_tab.dart';
 import 'package:talking_cp/pages/tabs/stories_tab.dart';
+import 'package:talking_cp/pages/tabs/variants_tab.dart';
 import 'package:talking_cp/providers/reading_provider.dart';
 
 class ControlPanelPage extends StatefulWidget {
@@ -20,7 +21,7 @@ class ControlPanelPageState extends State<ControlPanelPage> {
   late bool isProtrait;
 
   int catsLengths = 0;
-
+  int varsLength = 0;
   int storiesLength = 0;
 
   bool loaded = false;
@@ -67,10 +68,18 @@ class ControlPanelPageState extends State<ControlPanelPage> {
                   return Column(
                     //crossAxisAlignment: CrossAxisAlignment.start,
                     children: isProtrait
-                        ? _children(catsLengths, storiesLength)
+                        ? _children(
+                            varsLength: varsLength,
+                            catsLength: catsLengths,
+                            storiesLength: storiesLength)
                         : [
                             Row(
-                              children: _children(catsLengths, storiesLength),
+                              children: _children(
+                                  varsLength: varsLength,
+                                  catsLength: catsLengths),
+                            ),
+                            Row(
+                              children: _children(storiesLength: storiesLength),
                             )
                           ],
                   );
@@ -83,136 +92,215 @@ class ControlPanelPageState extends State<ControlPanelPage> {
     );
   }
 
-  List<Widget> _children(int _catsLength, int _storiesLength) {
+  List<Widget> _children(
+      {int? varsLength, int? catsLength, int? storiesLength}) {
     return [
-      Card(
-        clipBehavior: Clip.hardEdge,
-        elevation: 10,
-        shadowColor: Colors.amber,
-        color: Colors.amber,
-        child: InkWell(
-          onTap: () => {
-            Provider.of<Reading>(context, listen: false).setCatID(null),
-            Navigator.pushReplacementNamed(context, CategoriesTab.routeName)
-          },
-          child: SizedBox(
-            width: 250,
-            height: 120,
-            child: Column(
-              children: [
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+      varsLength == null
+          ? Container()
+          : Card(
+              clipBehavior: Clip.hardEdge,
+              elevation: 10,
+              shadowColor: Colors.deepOrange,
+              color: Colors.deepOrange,
+              child: InkWell(
+                onTap: () => {
+                  Provider.of<Reading>(context, listen: false)
+                      .setVariantID(null),
+                  Navigator.pushReplacementNamed(context, VariantsTab.routeName)
+                },
+                child: SizedBox(
+                  width: 250,
+                  height: 120,
+                  child: Column(
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text(
-                            "Category Count",
-                            style: TextStyle(color: Colors.white, fontSize: 20),
-                          ),
-                          Text(
-                            _catsLength.toString(),
-                            style: TextStyle(color: Colors.white, fontSize: 24),
-                          )
-                        ],
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text(
+                                  "Variant Count",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                                Text(
+                                  varsLength.toString(),
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 24),
+                                )
+                              ],
+                            ),
+                            Icon(
+                              Icons.install_desktop,
+                              color: Colors.white.withOpacity(.3),
+                              size: 56,
+                            )
+                          ],
+                        ),
                       ),
-                      Icon(
-                        Icons.list_alt,
-                        color: Colors.white.withOpacity(.3),
-                        size: 56,
+                      Container(
+                        color: Colors.grey.withOpacity(.4),
+                        child: Row(
+                          children: [
+                            Spacer(flex: 1),
+                            Text(
+                              "Categories",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            Spacer(flex: 8),
+                            Icon(
+                              Icons.navigate_next,
+                              color: Colors.white,
+                            ),
+                            Spacer(flex: 1)
+                          ],
+                        ),
                       )
                     ],
                   ),
                 ),
-                Container(
-                  color: Colors.grey.withOpacity(.4),
-                  child: Row(
-                    children: [
-                      Spacer(flex: 1),
-                      Text(
-                        "Categories",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Spacer(flex: 8),
-                      Icon(
-                        Icons.navigate_next,
-                        color: Colors.white,
-                      ),
-                      Spacer(flex: 1)
-                    ],
-                  ),
-                )
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
-      Card(
-        clipBehavior: Clip.hardEdge,
-        elevation: 10,
-        shadowColor: Colors.orange,
-        color: Colors.orange,
-        child: InkWell(
-          onTap: () => {
-            Provider.of<Reading>(context, listen: false).setCatID(null),
-            Navigator.pushReplacementNamed(context, StoriesTab.routeName)
-          },
-          child: SizedBox(
-            width: 250,
-            height: 120,
-            child: Column(
-              children: [
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+      catsLength == null
+          ? Container()
+          : Card(
+              clipBehavior: Clip.hardEdge,
+              elevation: 10,
+              shadowColor: Colors.amber,
+              color: Colors.amber,
+              child: InkWell(
+                onTap: () => {
+                  Provider.of<Reading>(context, listen: false).setCatID(null),
+                  Navigator.pushReplacementNamed(
+                      context, CategoriesTab.routeName)
+                },
+                child: SizedBox(
+                  width: 250,
+                  height: 120,
+                  child: Column(
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text(
-                            "Element Count",
-                            style: TextStyle(color: Colors.white, fontSize: 20),
-                          ),
-                          Text(
-                            _storiesLength.toString(),
-                            style: TextStyle(color: Colors.white, fontSize: 24),
-                          )
-                        ],
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text(
+                                  "Category Count",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                                Text(
+                                  catsLength.toString(),
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 24),
+                                )
+                              ],
+                            ),
+                            Icon(
+                              Icons.list_alt,
+                              color: Colors.white.withOpacity(.3),
+                              size: 56,
+                            )
+                          ],
+                        ),
                       ),
-                      Icon(
-                        Icons.list,
-                        color: Colors.white.withOpacity(.3),
-                        size: 56,
+                      Container(
+                        color: Colors.grey.withOpacity(.4),
+                        child: Row(
+                          children: [
+                            Spacer(flex: 1),
+                            Text(
+                              "Categories",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            Spacer(flex: 8),
+                            Icon(
+                              Icons.navigate_next,
+                              color: Colors.white,
+                            ),
+                            Spacer(flex: 1)
+                          ],
+                        ),
                       )
                     ],
                   ),
                 ),
-                Container(
-                  color: Colors.grey.withOpacity(.4),
-                  child: Row(
+              ),
+            ),
+      storiesLength == null
+          ? Container()
+          : Card(
+              clipBehavior: Clip.hardEdge,
+              elevation: 10,
+              shadowColor: Colors.orange,
+              color: Colors.orange,
+              child: InkWell(
+                onTap: () => {
+                  Provider.of<Reading>(context, listen: false).setCatID(null),
+                  Navigator.pushReplacementNamed(context, StoriesTab.routeName)
+                },
+                child: SizedBox(
+                  width: 250,
+                  height: 120,
+                  child: Column(
                     children: [
-                      Spacer(flex: 1),
-                      Text(
-                        "Elements",
-                        style: TextStyle(color: Colors.white),
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text(
+                                  "Element Count",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                                Text(
+                                  storiesLength.toString(),
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 24),
+                                )
+                              ],
+                            ),
+                            Icon(
+                              Icons.list,
+                              color: Colors.white.withOpacity(.3),
+                              size: 56,
+                            )
+                          ],
+                        ),
                       ),
-                      Spacer(flex: 8),
-                      Icon(
-                        Icons.navigate_next,
-                        color: Colors.white,
-                      ),
-                      Spacer(flex: 1)
+                      Container(
+                        color: Colors.grey.withOpacity(.4),
+                        child: Row(
+                          children: [
+                            Spacer(flex: 1),
+                            Text(
+                              "Elements",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            Spacer(flex: 8),
+                            Icon(
+                              Icons.navigate_next,
+                              color: Colors.white,
+                            ),
+                            Spacer(flex: 1)
+                          ],
+                        ),
+                      )
                     ],
                   ),
-                )
-              ],
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
     ];
   }
 
@@ -220,10 +308,12 @@ class ControlPanelPageState extends State<ControlPanelPage> {
     if (loaded) {
       return;
     }
+    var vars = await FirebaseAPI.fetchVars();
     var cats = await FirebaseAPI.fetchCats();
     var stories = await FirebaseAPI.fetchStories();
     setState(() {
       loaded = true;
+      varsLength = vars.length;
       catsLengths = cats.length;
       storiesLength = stories.length;
     });
