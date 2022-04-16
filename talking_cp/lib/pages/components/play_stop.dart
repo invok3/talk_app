@@ -1,5 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_sound/public/flutter_sound_player.dart';
+import 'package:just_audio/just_audio.dart';
 
 class PlayStopButton extends StatefulWidget {
   final String link;
@@ -12,15 +14,56 @@ class PlayStopButton extends StatefulWidget {
 }
 
 class _PlayStopButtonState extends State<PlayStopButton> {
-  FlutterSoundPlayer? player;
+  AudioPlayer player = AudioPlayer();
+
+  late StreamSubscription<bool> playingListener;
+
+  late StreamSubscription<ProcessingState> processingStateListener;
+
+  bool _isPlaying = false;
+
   bool _isLoading = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    playingListener = player.playingStream.listen(
+      (event) {
+        setState(() {
+          _isPlaying = event;
+        });
+      },
+    );
+    processingStateListener = player.processingStateStream.listen(
+      (event) {
+        if (event == ProcessingState.completed) {
+          setState(() {
+            _isLoading = false;
+            _isPlaying = false;
+          });
+        } else {
+          setState(() {
+            _isLoading = event == ProcessingState.loading;
+          });
+        }
+      },
+    );
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    playingListener.cancel();
+    processingStateListener.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
         borderRadius: BorderRadius.circular(100),
         onTap: () {
-          player == null ? play() : stop();
+          _isPlaying ? stop() : play();
         },
         child: Padding(
           padding:
@@ -35,30 +78,20 @@ class _PlayStopButtonState extends State<PlayStopButton> {
                         strokeWidth: 2,
                       )),
                 )
-              : Icon(player == null ? Icons.play_arrow : Icons.stop,
+              : Icon(_isPlaying ? Icons.stop : Icons.play_arrow,
                   color: Colors.amber),
         ));
   }
 
   play() async {
+    await player.setAudioSource(ProgressiveAudioSource(Uri.parse(widget.link)));
+    await player.play();
     setState(() {
-      _isLoading = true;
+      _isPlaying = true;
     });
-    player = await FlutterSoundPlayer().openPlayer();
-    await player
-        ?.startPlayer(fromURI: widget.link, whenFinished: stop)
-        .whenComplete(
-          () => setState(() {
-            _isLoading = false;
-          }),
-        );
-    setState(() {});
   }
 
   stop() async {
-    await player?.stopPlayer();
-    await player?.closePlayer();
-    player = null;
-    setState(() {});
+    await player.stop();
   }
 }

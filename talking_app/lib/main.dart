@@ -45,7 +45,20 @@ class StteManager extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        colorSchemeSeed: Color(0x005a22),
+        // primaryColor: Color(0x005a22),
+        // primarySwatch: MaterialColor(0x005a22, {
+        //   50: Color(0x005a22).withOpacity(.05),
+        //   100: Color(0x005a22).withOpacity(.1),
+        //   200: Color(0x005a22).withOpacity(.2),
+        //   300: Color(0x005a22).withOpacity(.3),
+        //   400: Color(0x005a22).withOpacity(.4),
+        //   500: Color(0x005a22).withOpacity(.5),
+        //   600: Color(0x005a22).withOpacity(.6),
+        //   700: Color(0x005a22).withOpacity(.7),
+        //   800: Color(0x005a22).withOpacity(.8),
+        //   900: Color(0x005a22).withOpacity(.9),
+        // }),
       ),
       routes: {
         "/": (context) => MainPage(),

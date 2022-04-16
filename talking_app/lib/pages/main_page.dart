@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:talking_app/controllers/firebase_api.dart';
 import 'package:talking_app/controllers/select_variant_dialog.dart';
 import 'package:talking_app/main.dart';
@@ -17,6 +18,12 @@ class _MainPageState extends State<MainPage> {
   List<Map<String, String>> cats = [];
 
   List<Map<String, String>> elems = [];
+
+  String _filter = "";
+
+  List<Map<String, String>> phrase = [];
+
+  AudioPlayer player = AudioPlayer();
 
   @override
   void initState() {
@@ -59,7 +66,10 @@ class _MainPageState extends State<MainPage> {
                         padding: EdgeInsets.all(4),
                         //app bar
                         height: AppBar().preferredSize.height * 2,
-                        color: Colors.red,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(.8),
                         child: Row(
                           children: [
                             Material(
@@ -68,15 +78,16 @@ class _MainPageState extends State<MainPage> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(100)),
                               child: InkWell(
-                                onTap: () {
-                                  debugPrint("");
-                                },
+                                onTap: () => _playPhrase(phrase),
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Icon(
                                     Icons.mic,
                                     size:
                                         AppBar().preferredSize.height * 2 - 24,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceVariant,
                                   ),
                                 ),
                               ),
@@ -85,12 +96,41 @@ class _MainPageState extends State<MainPage> {
                                 child: Container(
                               height: AppBar().preferredSize.height * 2 - 24,
                               decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: Colors.white.withOpacity(.8),
                                   shape: BoxShape.rectangle,
-                                  border: Border.all(color: Colors.white),
+                                  border: Border.all(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(12))),
-                              child: Row(),
+                              child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: phrase
+                                        .map((e) => Container(
+                                              padding: EdgeInsets.all(8),
+                                              height: AppBar()
+                                                      .preferredSize
+                                                      .height *
+                                                  1.5,
+                                              width: AppBar()
+                                                      .preferredSize
+                                                      .height *
+                                                  1.5,
+                                              child: Image.network(
+                                                e["imageLink"] ?? "",
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (c, o, st) {
+                                                  return Image.asset(
+                                                    "assets/images/500x300.png",
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                },
+                                              ),
+                                            ))
+                                        .toList(),
+                                  )),
                             )),
                             Material(
                               clipBehavior: Clip.hardEdge,
@@ -98,15 +138,16 @@ class _MainPageState extends State<MainPage> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(100)),
                               child: InkWell(
-                                onTap: () {
-                                  debugPrint("");
-                                },
+                                onTap: _backSpace,
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Icon(
                                     Icons.backspace,
                                     size:
                                         AppBar().preferredSize.height * 2 - 24,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceVariant,
                                   ),
                                 ),
                               ),
@@ -119,9 +160,12 @@ class _MainPageState extends State<MainPage> {
                         child: Row(
                           children: [
                             Container(
+                              height: double.infinity,
                               //sidebar
                               width: AppBar().preferredSize.height * 2,
-                              color: Colors.yellow,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer,
                               child: SingleChildScrollView(
                                 child: Column(
                                   //categories.map()
@@ -134,6 +178,10 @@ class _MainPageState extends State<MainPage> {
                                           //     borderRadius:
                                           //         BorderRadius.circular(100)),
                                           child: Card(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary,
+                                            clipBehavior: Clip.hardEdge,
                                             child: Container(
                                               width: AppBar()
                                                           .preferredSize
@@ -146,11 +194,26 @@ class _MainPageState extends State<MainPage> {
                                                       2 -
                                                   16,
                                               child: InkWell(
-                                                onTap: () {
-                                                  debugPrint("");
-                                                },
-                                                child: Image.network(
-                                                    e["image"] ?? ""),
+                                                onTap: () => _filterCats(e),
+                                                child: Column(
+                                                  children: [
+                                                    Flexible(
+                                                      fit: FlexFit.tight,
+                                                      child: Image.network(
+                                                        e["image"] ?? "",
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder:
+                                                            (c, o, st) {
+                                                          return Image.asset(
+                                                            "assets/images/500x300.png",
+                                                            fit: BoxFit.cover,
+                                                          );
+                                                        },
+                                                      ),
+                                                    ),
+                                                    Text(e["title"] ?? ""),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -162,22 +225,47 @@ class _MainPageState extends State<MainPage> {
                             ),
                             Flexible(
                               //body
-                              child: GridView.count(
-                                crossAxisCount:
-                                    MediaQuery.of(context).size.width ~/
-                                            (AppBar().preferredSize.height * 2 -
-                                                16) -
-                                        1,
-                                children: [
-                                  Icon(Icons.abc),
-                                  Icon(Icons.abc),
-                                  Icon(Icons.abc),
-                                  Icon(Icons.abc),
-                                  Icon(Icons.abc),
-                                  Icon(Icons.abc),
-                                  Icon(Icons.abc),
-                                  Icon(Icons.abc),
-                                ],
+                              child: Container(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .secondaryContainer,
+                                child: GridView.count(
+                                  crossAxisCount: MediaQuery.of(context)
+                                              .size
+                                              .width ~/
+                                          (AppBar().preferredSize.height * 2 -
+                                              16) -
+                                      1,
+                                  children: elems
+                                      .where((element) =>
+                                          element["catID"] == _filter)
+                                      .map((e) => Card(
+                                            color: Colors.lime.shade100,
+                                            clipBehavior: Clip.hardEdge,
+                                            child: InkWell(
+                                              onTap: () => _add(e),
+                                              child: Column(
+                                                children: [
+                                                  Flexible(
+                                                    fit: FlexFit.tight,
+                                                    child: Image.network(
+                                                      e["imageLink"] ?? "",
+                                                      fit: BoxFit.cover,
+                                                      errorBuilder: (c, o, st) {
+                                                        return Image.asset(
+                                                          "assets/images/500x300.png",
+                                                          fit: BoxFit.cover,
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                  Text(e["title"] ?? "")
+                                                ],
+                                              ),
+                                            ),
+                                          ))
+                                      .toList(),
+                                ),
                               ),
                             )
                           ],
@@ -202,5 +290,38 @@ class _MainPageState extends State<MainPage> {
       cats = catList;
       elems = elemList;
     });
+  }
+
+  _filterCats(Map<String, String> category) {
+    setState(() {
+      _filter = category["id"] ?? "";
+    });
+  }
+
+  _add(Map<String, String> element) {
+    phrase.add(element);
+    setState(() {});
+    _playPhrase([element]);
+  }
+
+  void _backSpace() {
+    if (phrase.isNotEmpty) {
+      phrase.removeLast();
+      setState(() {});
+    }
+  }
+
+  void _playPhrase(List<Map<String, String>> mPhrase) async {
+    // for (var word in phrase.toSet().toList()) {
+    //   await player.setAudioSource(
+    //       ProgressiveAudioSource(Uri.parse(word["audioFileLink"] ?? "")));
+    //   await player.load();
+    // }
+    await player.setAudioSource(ConcatenatingAudioSource(
+        children: mPhrase
+            .map((e) =>
+                ProgressiveAudioSource(Uri.parse(e["audioFileLink"] ?? "")))
+            .toList()));
+    await player.play();
   }
 }

@@ -63,11 +63,10 @@ class FirebaseAPI {
                 "description": e["description"].toString()
               })
           .toList();
-      var shared = list;
       String sharedID = await _getSharedID();
-      list.removeWhere((element) => element["varID"] != variantID);
-      shared.removeWhere((element) => element["varID"] != sharedID);
-      return list + shared;
+      list.removeWhere((element) =>
+          !(element["varID"] == variantID || element["varID"] == sharedID));
+      return list;
     } catch (e) {
       debugPrint(e.toString());
       return [];
